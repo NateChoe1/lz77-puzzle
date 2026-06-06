@@ -1,0 +1,87 @@
+This is a solution to puzzle 5. This payload is an order 3 loopy quine, where
+each level has a different header of different length. The challenging part
+about getting this to work is the fact that each payload can have a different
+length, so you can't rely on a single repeat instruction to work. You can,
+however, rely on the fact that repeat instructions are constant length, so once
+you've solved puzzle 4 you can set up 3 different repeat instructions and use
+the puzzle 4 payload to alternate between them.
+
+H1
+1
+<<<<<
+print 4
+H2
+1
+2
+<<<<<
+print 6
+print 5
+H3
+1
+2
+3
+<<<<<
+print 5
+print 4
+print 3
+H1
+1
+<<<<<
+print 3
+print 6
+print 5
+print 4
+repeat 4 18
+print 5
+print 3
+print 7
+print 6
+print 5
+repeat 5 18
+print 6
+print 5
+print 3
+print 5
+print 4
+print 3
+repeat 3 18
+print 7
+print 6
+print 5
+print 3
+print 6
+print 5
+print 4
+repeat 4 18
+print 3
+print 7
+print 6
+print 5
+repeat 5 21
+print 6
+print 3
+print 7
+print 6
+print 5
+repeat 5 21
+print 6
+repeat 6 6
+print 0
+print 0
+print 4
+repeat 6 6
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+print 0
+print 0
+print 0
+print 0

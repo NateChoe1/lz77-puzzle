@@ -1,0 +1,51 @@
+This is a solution to puzzle number 4. When decompressed three times it outputs
+its own code, cycling between headers H1, H2, and H3. The same method
+generalizes to loopy quines of any order. Notably, however, this method assumes
+that all of the quines have the same length.
+
+H1
+<<<<<
+print 2
+H2
+<<<<<
+print 3
+print 2
+H3
+<<<<<
+print 4
+print 3
+print 2
+H1
+<<<<<
+print 3
+print 4
+print 3
+print 2
+repeat 2 12
+print 6
+print 3
+print 4
+print 3
+print 2
+repeat 2 12
+print 6
+repeat 6 6
+print 0
+print 0
+print 4
+repeat 6 6
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+print 0
+print 0
+print 0
+print 0

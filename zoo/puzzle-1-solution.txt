@@ -1,0 +1,23 @@
+This is a quine, when decompressed it outputs its own code (excluding this
+header)
+<<<<<
+print 0
+print 0
+print 0
+print 4
+print 0
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+print 0
+print 0
+print 0
+print 0

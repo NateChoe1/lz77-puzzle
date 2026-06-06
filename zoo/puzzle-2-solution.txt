@@ -1,0 +1,52 @@
+Puzzle 2
+solution
+which uses
+an arbitrary
+header
+<<<<<
+print 7
+Puzzle 2
+solution
+which uses
+an arbitrary
+header
+<<<<<
+print 7
+repeat 7 7
+print 0
+print 0
+print 4
+repeat 7 7
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 0
+print 0
+print 2
+repeat 4 4
+print 0
+print 0
+print 7
+repeat 7 7
+>>>>>
+arbitrary tail
+as part of
+solution to
+puzzle number
+two
+repeat 7 7
+>>>>>
+arbitrary tail
+as part of
+solution to
+puzzle number
+two

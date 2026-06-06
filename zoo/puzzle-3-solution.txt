@@ -1,0 +1,45 @@
+This is a solution to puzzle number 3. When decompressed, the header below
+changes to H2, then when that's decompressed time it changes back to the
+original H1. This particular solution is based on my solution to problem 4,
+which is why there's a header in each file. It should be easy enough to modify
+this payload to run without a header though.
+
+H1
+<<<<<
+print 2
+H2
+<<<<<
+print 3
+print 2
+H1
+<<<<<
+print 2
+print 3
+print 2
+repeat 2 7
+print 5
+print 2
+print 3
+print 2
+repeat 2 7
+print 5
+repeat 5 5
+print 0
+print 0
+print 4
+repeat 5 5
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+print 0
+print 0
+print 0
+print 0

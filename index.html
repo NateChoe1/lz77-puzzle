@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>LZ77 quine puzzle</h1>
+    <p>Inspired by <a href=https://wgreenberg.github.io/quine.zip/>Will
+    Greenberg's</a> implementation of this puzzle, which itself was inspired by
+    some now-defunct webpage. This site adds a few enhancements to allow for
+    some significantly harder puzzles.</p>
+    <p>There are two commands, corresponding to the two actions in an LZ77
+    encoded document:</p>
+    <ul>
+      <li><code>print n</code> Copy the next <code>n</code> lines of the input
+        to the output</li>
+      <li><code>repeat length offset</code> Repeat <code>length</code> lines
+        of output, starting <code>offset</code> lines from the end.</li>
+    </ul>
+    <p>You can also add a header and footer to your quine as would be seen in a
+    real LZ77 encoded document using the <code>&lt;&lt;&lt;&lt;&lt;</code> and
+    <code>&gt;&gt;&gt;&gt;&gt;</code> directives, as in the following:</p>
+    <blockquote>
+      <pre><code>
+This is a header,
+it won't be printed
+to the output
+&lt;&lt;&lt;&lt;&lt;
+print 4
+Hello world!
+This text
+will be
+shown.
+&gt;&gt;&gt;&gt;&gt;
+This is a footer,
+it also won't be
+printed to the
+output.
+      </code></pre>
+    </blockquote>
+    <label for=outputCount>Maximum number of output layers:</label>
+    <input type=number value=1 id=outputCount min=1><br>
+    <div id=interactive>
+      <textarea id=payload cols=40 rows=20></textarea>
+    </div>
+    <button id=update>Update</button>
+
+    <h2>Puzzles</h2>
+    <p>You are allowed to add headers and footers to solve any of these puzzles,
+    except where explicitly forbidden.</p>
+    <ol>
+    <li>Create an input which outputs itself when decompressed.</li>
+    <li>Find a general method to produce these inputs given some arbitrary header
+    and footer.</li>
+    <li>Find an input which outputs its own data when decompressed <i>twice</i>
+    (but not when it's decompressed only once).</li>
+    <li>Find a general method to create loopy quines of any order.</li>
+    <li>Find a general method to create loopy quines of any order, where each
+    level can have some arbitrary header.</li>
+    <li>Find a general method to create loopy quines of any order, where each
+    level can have some arbitrary header and footer (I haven't solved this
+    one).</li>
+    <li>Create an input which is at most 10 lines long that decompresses three
+    times to an output of at least 500 lines, where each <code>repeat()</code>
+    instance repeats no more than 5 lines of output.</li>
+    <li>Create an input which could decompress infinitely, where each level of
+    decompression increases the output size.</li>
+    </ol>
+
+    <h2>Further reading</h2>
+    <p>Note that some of these resources also discuss the implementation details
+    when actually constructing a DEFLATE-compressed file, which is a worthwhile
+    endeavour on its own, but which will not help with these particular
+    puzzles.</p>
+    <p>Russ Cox's <a href=https://research.swtch.com/zip>exploration</a> of zip
+    quines</p>
+    <p>Ruben Van Mello's <a
+      href=https://www.mdpi.com/2076-3417/14/21/9797>master's thesis</a>
+    exploring loopy zip quines</p>
+    <p>My own <a href=https://github.com/NateChoe1/zip-bomb>zip bombs</a>.</p>
+
+    <p>Written and donated to the public domain by Nate Choe, 2026.</p>
+  </body>
+
+  <script>
+    const outputCountElement = document.getElementById("outputCount");
+    const payloadElement = document.getElementById("payload");
+    const updateElement = document.getElementById("update");
+    const interactiveElement = document.getElementById("interactive");
+
+    function process(data) {
+      let lines = data.split("\n");
+      let start = 0;
+      for (let i = 0; i < lines.length; ++i) {
+        if (lines[i] === "<<<<<") {
+          start = i+1;
+          break;
+        }
+      }
+
+      let end = lines.length;
+      for (let i = lines.length-1; i >= 0; --i) {
+        if (lines[i] === ">>>>>") {
+          end = i;
+          break;
+        }
+      }
+
+      const output = [];
+      for (let i = start; i < end; ++i) {
+        const line = i+1;
+        const parts = lines[i].split(" ");
+        if (parts[0] === "print") {
+          if (parts.length !== 2) {
+            return ["", `ERROR: At line ${line}, print expects 2 arguments`];
+          }
+          const printLength = Number(parts[1]);
+          if (!Number.isInteger(printLength) || printLength < 0) {
+            return ["", `ERROR: At line ${line}, invalid print length`];
+          }
+          if (i + printLength >= end) {
+            return ["", `ERROR: At line ${line}, not enough data for print`];
+          }
+          for (let j = 0; j < printLength; ++j) {
+            output.push(lines[++i]);
+          }
+        } else if (parts[0] === "repeat") {
+          if (parts.length !== 3) {
+            return ["", `ERROR: At line ${line}, repeat expects 3 arguments`];
+          }
+          const repLength = Number(parts[1]);
+          const offset = Number(parts[2]);
+
+          /* DEFLATE doesn't allow repeat blocks with less than 3 bytes long */
+          if (!Number.isInteger(repLength) || repLength <= 0) {
+            return ["", `ERROR: At line ${line}, invalid repeat length`];
+          }
+          if (!Number.isInteger(offset)
+              || offset <= 0 || offset > output.length) {
+            return ["", `ERROR: At line ${line}, invalid repeat offset`];
+          }
+
+          for (let j = 0; j < repLength; ++j) {
+            output.push(output[output.length - offset]);
+          }
+        } else {
+          return ["", `ERROR: At line ${line}, unknown command ${parts[0]}`];
+        }
+      }
+
+      return [output.join("\n"), ""];
+    }
+
+    function prune(elem, idx) {
+      while (elem.children.length > idx) {
+        elem.removeChild(elem.children[idx]);
+      }
+    }
+
+    function updateOutput() {
+      let prev = payloadElement.value;
+      const outputCount = outputCountElement.value;
+      let i;
+      let error;
+      for (i = 0; i < outputCount; ++i) {
+        let data;
+        output = process(prev);
+        if (error !== undefined) {
+          data = error;
+        } else if (output[1] !== "") {
+          error = output[1];
+          data = error;
+        } else {
+          data = output[0];
+        }
+
+        if (interactiveElement.children.length <= i+1 ||
+              interactiveElement.children[i+1].nodeName !== "TEXTAREA") {
+          prune(interactiveElement, i+1);
+          const thisOutput = document.createElement("textarea");
+          thisOutput.cols = 40;
+          thisOutput.rows = 20;
+          thisOutput.value = data;
+          thisOutput.readOnly = true;
+          interactiveElement.appendChild(thisOutput);
+        } else {
+          interactiveElement.children[i+1].value = data;
+        }
+        prev = output[0];
+      }
+      prune(interactiveElement, i+1);
+    }
+
+    outputCountElement.addEventListener("change", updateOutput);
+    payloadElement.addEventListener("change", updateOutput);
+    updateElement.addEventListener("click", updateOutput);
+  </script>
+</html>

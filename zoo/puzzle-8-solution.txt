@@ -1,0 +1,26 @@
+This is a solution to puzzle 8. This payload can decompress infinitely, growing
+bigger and bigger with each decompression layer. It's essentially just a quine
+with a block of repeat 2 1 commands at the end which approximately double in
+size with each decompression layer.
+<<<<<
+print 0
+print 0
+print 0
+print 4
+print 0
+print 0
+print 0
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 4 4
+print 4
+repeat 2 1
+repeat 2 1
+repeat 2 1
+repeat 2 1
+repeat 2 1
