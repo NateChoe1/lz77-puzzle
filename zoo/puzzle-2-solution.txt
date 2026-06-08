@@ -31,7 +31,7 @@ print 4
 repeat 4 4
 print 0
 print 0
-print 2
+print 7
 repeat 4 4
 print 0
 print 0
