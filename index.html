@@ -94,27 +94,35 @@ output.
 
     function process(data) {
       let lines = data.split("\n");
-      let start = 0;
-      for (let i = 0; i < lines.length; ++i) {
-        if (lines[i] === "<<<<<") {
-          start = i+1;
-          break;
-        }
-      }
-
+      let start = 1;
       let end = lines.length;
-      for (let i = lines.length-1; i >= 0; --i) {
-        if (lines[i] === ">>>>>") {
-          end = i;
-          break;
+      let compileMode = false;
+
+      if (lines[0] === "COMPILE_MODE") {
+        start = 1;
+        compileMode = true;
+      } else {
+        for (let i = 0; i < lines.length; ++i) {
+          if (lines[i] === "<<<<<") {
+            start = i+1;
+            break;
+          }
+        }
+
+        for (let i = lines.length-1; i >= 0; --i) {
+          if (lines[i] === ">>>>>") {
+            end = i;
+            break;
+          }
         }
       }
 
       const output = [];
+
       for (let i = start; i < end; ++i) {
         const line = i+1;
         const parts = lines[i].split(" ");
-        if (parts[0] === "print") {
+        if (parts[0] === "print" || (compileMode && parts[0] === "compile_print")) {
           if (parts.length !== 2) {
             return ["", `ERROR: At line ${line}, print expects 2 arguments`];
           }
@@ -124,6 +132,9 @@ output.
           }
           if (i + printLength >= end) {
             return ["", `ERROR: At line ${line}, not enough data for print`];
+          }
+          if (compileMode && parts[0] === "print") {
+            output.push(lines[i]);
           }
           for (let j = 0; j < printLength; ++j) {
             output.push(lines[++i]);
@@ -144,8 +155,98 @@ output.
             return ["", `ERROR: At line ${line}, invalid repeat offset`];
           }
 
-          for (let j = 0; j < repLength; ++j) {
-            output.push(output[output.length - offset]);
+          if (compileMode) {
+            output.push(lines[i]);
+          } else {
+            for (let j = 0; j < repLength; ++j) {
+              output.push(output[output.length - offset]);
+            }
+          }
+        } else if (compileMode && (parts[0] === "quine" ||
+                                   parts[0] === "quine_direct")) {
+          if (parts.length !== 3) {
+            return ["", `ERROR: At line ${line}, quine expects 3 arguments`];
+          }
+
+          const headerLength = Number(parts[1]);
+          const tailLength = Number(parts[2]);
+          if (!Number.isInteger(headerLength) || headerLength < 0) {
+            return ["", `ERROR: At line ${line}, invalid header length`];
+          }
+          if (!Number.isInteger(tailLength) || tailLength < 0) {
+            return ["", `ERROR: At line ${line}, invalid tail length`];
+          }
+
+          if (parts[0] === "quine_direct") {
+            for (let j = 0; j < headerLength; ++j) {
+              output.push(lines[i+j+1]);
+            }
+          }
+
+          let headerNop = ['print 0', 'print 0', 'print 0'];
+          if (headerLength <= headerNop.length) {
+            for (let j = 0; j < headerLength; ++j) {
+              headerNop[j] = lines[++i];
+            }
+          } else {
+            output.push(`print ${headerLength+1}`);
+            for (let j = 0; j < headerLength; ++j) {
+              output.push(lines[++i]);
+            }
+            output.push(`print ${headerLength+1}`);
+            headerNop[0] = `repeat ${headerLength+1} ${headerLength+1}`;
+          }
+
+          for (let j = 0; j < headerNop.length; ++j) {
+            output.push(headerNop[j]);
+          }
+          output.push(`print 4`);
+          for (let j = 0; j < headerNop.length; ++j) {
+            output.push(headerNop[j]);
+          }
+          output.push("print 4");
+          output.push("repeat 4 4");
+          output.push("print 4");
+          output.push("repeat 4 4");
+          output.push("print 4");
+          output.push("repeat 4 4");
+          output.push("print 4");
+          output.push("repeat 4 4");
+          output.push("print 4");
+          output.push("repeat 4 4");
+
+          tailNop = ["print 0", "print 0", "print 0"];
+          if (tailLength <= tailNop.length) {
+            for (let j = 0; j < tailLength; ++j) {
+              tailNop[tailNop.length - tailLength + j] = lines[++i];
+            }
+          } else {
+            tailNop[tailNop.length-1] = `print ${tailLength+1}`;
+          }
+          console.log(tailNop);
+          for (let j = 0; j < tailNop.length; ++j) {
+            output.push(tailNop[j]);
+          }
+          output.push("repeat 4 4");
+
+          let tailNoncePrints = (tailLength > tailNop.length) ?
+                tailNop.length : (tailNop.length-tailLength);
+          for (let j = 0; j < tailNoncePrints; ++j) {
+            output.push(tailNop[j]);
+          }
+
+          if (tailLength > tailNop.length) {
+            output.push(`repeat ${tailLength+1} ${tailLength+1}`);
+            for (let j = 0; j < tailLength; ++j) {
+              output.push(lines[++i]);
+            }
+            output.push(`repeat ${tailLength+1} ${tailLength+1}`);
+          }
+
+          if (parts[0] === "quine_direct") {
+            for (let j = 0; j < tailLength; ++j) {
+              output.push(lines[i-tailLength+j+1]);
+            }
           }
         } else {
           return ["", `ERROR: At line ${line}, unknown command ${parts[0]}`];
