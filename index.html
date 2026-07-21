@@ -197,7 +197,7 @@ output.
             headerNop[0] = `repeat ${headerLength+1} ${headerLength+1}`;
           }
 
-          for (let j = 0; j < headerNop.length; ++j) {
+          for (let j = (headerLength <= 3 ? headerLength : 0); j < headerNop.length; ++j) {
             output.push(headerNop[j]);
           }
           output.push(`print 4`);
