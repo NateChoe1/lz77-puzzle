@@ -39,6 +39,13 @@ This is essentially a built-in solution to problems 1 and 2.
 Similar to `quine`, except the head and tail are directly included in the
 compiled code.
 
+### junk
+
+    junk length(T)
+    T
+
+When compiled, it will produce a quine which ends with `T`.
+
 ### Examples
 
 Puzzle 2 solution
